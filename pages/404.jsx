@@ -14,7 +14,7 @@ export default function Custom404() {
 
             <div className="my-6">
             <Image
-                src="/404-illustraion.jpg" // Or another image path you have in public/
+                src="/404-illustration.jpg" // Or another image path you have in public/
                 alt="Page not found"
                 width={400}
                 height={250}
