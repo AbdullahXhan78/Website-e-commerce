@@ -9,17 +9,23 @@ export default async function handler(req, res) {
         try {
         console.log("📥 API received cart:", req.body);
 
-        const lineItems = req.body.map(item => ({
+        const lineItems = req.body.map(item => {
+            const imageUrl = item.image?.startsWith('http')
+            ? item.image
+            : `${req.headers.origin}${item.image || '/placeholder.png'}`;
+
+            return {
             price_data: {
-            currency: 'usd',
-            product_data: {
+                currency: 'usd',
+                product_data: {
                 name: item.name || "Unnamed Product",
-                images: item.image ? [item.image] : [],
-            },
-            unit_amount: Math.round(item.price * 100), // Must be in cents!
+                images: [imageUrl],
+                },
+                unit_amount: Math.round(item.price * 100),
             },
             quantity: item.quantity || 1,
-        }));
+            };
+        });
 
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],

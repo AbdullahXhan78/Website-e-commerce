@@ -8,38 +8,50 @@ const CartContext = createContext();
 export const CartProvider = ({ children }) => {
     const [cart, setCart] = useState([]);
 
-    // ✅ Load from localStorage on mount
+    // ✅ Clear cart on refresh (DEV ONLY)
+    useEffect(() => {
+        if (process.env.NODE_ENV === 'development') {
+            localStorage.removeItem('cart');
+            setCart([]);
+        }
+    }, []);
+
+    // ✅ Load cart from localStorage if data exists
     useEffect(() => {
         const localCart = localStorage.getItem('cart');
         if (localCart) setCart(JSON.parse(localCart));
     }, []);
 
-    // ✅ Save to localStorage on change
+    // ✅ Save cart to localStorage whenever it changes
     useEffect(() => {
         localStorage.setItem('cart', JSON.stringify(cart));
     }, [cart]);
 
-    // ✅ Add product to cart with fallbacks for Stripe-required data
+    // ✅ Add item to cart
     const addToCart = useCallback((product) => {
-        setCart(prev => {
-            const exists = prev.find(item => item.id === product.id);
+        setCart((prev) => {
+            const exists = prev.find((item) => item.id === product.id);
 
             if (exists) {
                 toast.success('Cart updated ✅');
-                return prev.map(item =>
+                return prev.map((item) =>
                     item.id === product.id
                         ? { ...item, quantity: item.quantity + 1 }
                         : item
                 );
             }
 
-            // 🛠️ Ensure required fields for Stripe
+            // ✅ Ensure image has full URL for payment gateways etc.
+            const absoluteImageUrl = product.image?.startsWith('http')
+                ? product.image
+                : `${window.location.origin}${product.image || '/placeholder.png'}`;
+
             const newItem = {
                 id: product.id,
                 name: product.name || 'Unnamed Product',
-                image: product.image || 'https://via.placeholder.com/150',
+                image: absoluteImageUrl,
                 price: typeof product.price === 'number' ? product.price : 0,
-                quantity: 1
+                quantity: 1,
             };
 
             toast.success('Added to cart 🛒');
@@ -47,10 +59,10 @@ export const CartProvider = ({ children }) => {
         });
     }, []);
 
-    // ✅ Remove product from cart
+    // ✅ Remove item from cart
     const removeFromCart = useCallback((id) => {
-        setCart(prev => {
-            const updatedCart = prev.filter(product => product.id !== id);
+        setCart((prev) => {
+            const updatedCart = prev.filter((product) => product.id !== id);
             toast.error('Removed from cart ❌');
             return updatedCart;
         });
@@ -63,5 +75,5 @@ export const CartProvider = ({ children }) => {
     );
 };
 
-// ✅ Hook to use cart context easily in other components
+// ✅ Custom hook to use cart
 export const useCart = () => useContext(CartContext);

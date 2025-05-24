@@ -3,8 +3,7 @@
 import { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { stripePromise } from '../utils/stripe';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
+
 
 export default function CartPage() {
     const { cart, removeFromCart } = useCart();

@@ -9,9 +9,8 @@ export default function App({ Component, pageProps }) {
     return (
         <CartProvider>
         <WishlistProvider>
-            <Navbar />
+            
             <Component {...pageProps} />
-            <Footer /> {/* ✅ Add Footer here */}
             <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
         </WishlistProvider>
         </CartProvider>
